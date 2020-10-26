@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/contactListFragment"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <ImageView
+        android:id="@+id/contactListAvatarImage"
+        android:layout_width="70dp"
+        android:layout_height="90dp"
+        android:layout_marginLeft="@dimen/space_horizontal_small"
+        android:layout_marginTop="@dimen/space_vertical_small"
+        android:src="@drawable/ic_launcher_foreground"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/contactListNameText"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/space_horizontal_small"
+        android:layout_marginTop="@dimen/space_vertical_small"
+        android:paddingTop="@dimen/space_vertical_small"
+        android:paddingBottom="@dimen/space_vertical_small"
+        android:text="@string/name"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/contactListAvatarImage"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/contactList_numberText"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/space_horizontal_small"
+        android:layout_marginTop="@dimen/space_vertical_small"
+        android:text="@string/number"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/contactListAvatarImage"
+        app:layout_constraintTop_toBottomOf="@id/contactListNameText" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
