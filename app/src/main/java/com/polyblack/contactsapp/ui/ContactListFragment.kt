@@ -8,14 +8,17 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import com.polyblack.contactsapp.R
 import com.polyblack.contactsapp.databinding.FragmentContactListBinding
+import com.polyblack.contactsapp.model.Contact
 
-class ContactListFragment : Fragment() {
+class ContactListFragment : Fragment(),
+    OnContactsListResultListener {
     private var contactListener: OnContactSelectedListener? = null
     private var toolbarBackButtonListener: ToolbarBackButtonListener? = null
+    private var serviceCommandsListener: ServiceCommandsListener? = null
     private var _binding: FragmentContactListBinding? = null
     private val binding get() = _binding!!
     interface OnContactSelectedListener {
-        fun onContactSelected(id: Int)
+        fun onContactSelected(contactId: Int)
     }
 
     override fun onAttach(context: Context) {
@@ -26,6 +29,14 @@ class ContactListFragment : Fragment() {
         if (context is ToolbarBackButtonListener) {
             toolbarBackButtonListener = context
         }
+        if (context is ServiceCommandsListener) {
+            serviceCommandsListener = context
+        }
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        serviceCommandsListener?.getContactList(this)
     }
 
     override fun onCreateView(
@@ -48,5 +59,9 @@ class ContactListFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+    override fun onGetContactList(contactList: List<Contact>) {
+        //TODO recyclerView и заполнение
     }
 }
