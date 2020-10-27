@@ -1,41 +1,28 @@
 package com.polyblack.contactsapp
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import androidx.appcompat.widget.Toolbar
+import androidx.appcompat.app.AppCompatActivity
+import com.polyblack.contactsapp.databinding.ActivityMainBinding
 import com.polyblack.contactsapp.ui.ContactDetailsFragment
 import com.polyblack.contactsapp.ui.ContactListFragment
 import com.polyblack.contactsapp.ui.ToolbarBackButtonListener
 
-class MainActivity : AppCompatActivity(), ContactListFragment.OnContactSelectedListener,
+class MainActivity :
+    AppCompatActivity(),
+    ContactListFragment.OnContactSelectedListener,
     ToolbarBackButtonListener {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
-        val toolbar = findViewById<Toolbar>(R.id.toolbar)
-        setSupportActionBar(toolbar)
+        val binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+        setSupportActionBar(binding.toolbar)
         if (savedInstanceState == null) {
-            setContactListFragment()
+            addContactListFragment()
         }
     }
 
-    private fun setContactListFragment() {
-        val contactListFragment = ContactListFragment()
-        supportFragmentManager.beginTransaction()
-            .add(R.id.fragment_container, contactListFragment)
-            .commit()
-    }
-
-    private fun setContactDetailsFragment(id: Int) {
-        val detailsFragment = ContactDetailsFragment.newInstance(id)
-        supportFragmentManager.beginTransaction()
-            .replace(R.id.fragment_container, detailsFragment)
-            .addToBackStack(null)
-            .commit()
-    }
-
     override fun onContactSelected(id: Int) {
-        setContactDetailsFragment(id)
+        replaceWithContactDetailsFragment(id)
     }
 
     override fun onSupportNavigateUp(): Boolean {
@@ -44,9 +31,24 @@ class MainActivity : AppCompatActivity(), ContactListFragment.OnContactSelectedL
     }
 
     override fun setButtonVisibility(isVisible: Boolean) {
-        supportActionBar.let {
-            it?.setDisplayHomeAsUpEnabled(isVisible)
-            it?.setDisplayShowHomeEnabled(isVisible)
+        supportActionBar?.let {
+            it.setDisplayHomeAsUpEnabled(isVisible)
+            it.setDisplayShowHomeEnabled(isVisible)
         }
+    }
+
+    private fun addContactListFragment() {
+        val contactListFragment = ContactListFragment()
+        supportFragmentManager.beginTransaction()
+            .add(R.id.fragment_container, contactListFragment)
+            .commit()
+    }
+
+    private fun replaceWithContactDetailsFragment(id: Int) {
+        val detailsFragment = ContactDetailsFragment.newInstance(id)
+        supportFragmentManager.beginTransaction()
+            .replace(R.id.fragment_container, detailsFragment)
+            .addToBackStack(null)
+            .commit()
     }
 }

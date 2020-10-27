@@ -13,6 +13,7 @@
         android:id="@+id/contactDetailsAvatarImage"
         android:layout_width="70dp"
         android:layout_height="90dp"
+        android:contentDescription="@string/avatar"
         android:src="@drawable/ic_launcher_background"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -21,6 +22,7 @@
         android:id="@+id/contactDetailsNameText"
         android:layout_width="0dp"
         android:layout_height="0dp"
+        android:layout_marginStart="@dimen/space_horizontal_small"
         android:layout_marginLeft="@dimen/space_horizontal_small"
         android:gravity="center"
         android:text="@string/name"
@@ -28,7 +30,6 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@id/contactDetailsAvatarImage"
         app:layout_constraintTop_toTopOf="parent" />
-
 
     <TextView
         android:id="@+id/contactDetailsNumber1Text"
@@ -76,6 +77,4 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/contactDetailsEmail2Text" />
-
-
 </androidx.constraintlayout.widget.ConstraintLayout>

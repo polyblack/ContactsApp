@@ -13,7 +13,7 @@
         android:background="@color/colorPrimary"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <FrameLayout
+    <androidx.fragment.app.FragmentContainerView
         android:id="@+id/fragment_container"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
