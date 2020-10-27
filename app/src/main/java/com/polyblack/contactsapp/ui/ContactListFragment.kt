@@ -2,17 +2,18 @@ package com.polyblack.contactsapp.ui
 
 import android.content.Context
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
+import androidx.fragment.app.Fragment
 import com.polyblack.contactsapp.R
-import com.polyblack.contactsapp.model.Contact
+import com.polyblack.contactsapp.databinding.FragmentContactListBinding
 
 class ContactListFragment : Fragment() {
     private var contactListener: OnContactSelectedListener? = null
     private var toolbarBackButtonListener: ToolbarBackButtonListener? = null
+    private var _binding: FragmentContactListBinding? = null
+    private val binding get() = _binding!!
     interface OnContactSelectedListener {
         fun onContactSelected(id: Int)
     }
@@ -32,12 +33,13 @@ class ContactListFragment : Fragment() {
     }
 
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
+        inflater: LayoutInflater,
+        container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        val view = inflater.inflate(R.layout.fragment_contact_list, container, false)
-        val avatarImage = view.findViewById<ImageView>(R.id.contactListAvatarImage)
-        avatarImage.setOnClickListener { contactListener?.onContactSelected(1) }
+        _binding = FragmentContactListBinding.inflate(inflater, container, false)
+        val view = binding.root
+        binding.contactListAvatarImage.setOnClickListener { contactListener?.onContactSelected(1) }
         return view
     }
 
@@ -47,4 +49,8 @@ class ContactListFragment : Fragment() {
         toolbarBackButtonListener?.setButtonVisibility(false)
     }
 
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
 }
