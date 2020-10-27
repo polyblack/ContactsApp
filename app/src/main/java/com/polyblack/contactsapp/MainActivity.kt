@@ -11,6 +11,7 @@ class MainActivity :
     AppCompatActivity(),
     ContactListFragment.OnContactSelectedListener,
     ToolbarBackButtonListener {
+
     private lateinit var binding : ActivityMainBinding
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
