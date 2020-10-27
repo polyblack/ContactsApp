@@ -1,3 +1,9 @@
 <resources>
     <string name="app_name">ContactsApp</string>
+    <string name="name">Имя</string>
+    <string name="number">Номер</string>
+    <string name="email">Email</string>
+    <string name="contacts">Контакты</string>
+    <string name="profile">Профиль</string>
+    <string name="avatar">Аватар</string>
 </resources>
