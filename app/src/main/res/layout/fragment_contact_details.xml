@@ -7,7 +7,7 @@
     android:paddingLeft="@dimen/space_horizontal_small"
     android:paddingTop="@dimen/space_vertical_small"
     android:paddingRight="@dimen/space_horizontal_small"
-    tools:context=".ui.ContactDetailsFragment">
+    tools:context=".ui.fragments.contact_details.ContactDetailsFragment">
 
     <ImageView
         android:id="@+id/contactDetailsAvatarImage"
