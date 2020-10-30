@@ -21,15 +21,35 @@
     <TextView
         android:id="@+id/contactDetailsNameText"
         android:layout_width="0dp"
-        android:layout_height="0dp"
+        android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/space_horizontal_small"
         android:layout_marginLeft="@dimen/space_horizontal_small"
         android:gravity="center"
         android:text="@string/name"
-        app:layout_constraintBottom_toBottomOf="@id/contactDetailsAvatarImage"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@id/contactDetailsAvatarImage"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/contactDetailsBirthdayText"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/space_horizontal_small"
+        android:layout_marginLeft="@dimen/space_horizontal_small"
+        android:text="@string/birthday"
+        app:layout_constraintBottom_toBottomOf="@id/contactDetailsAvatarImage"
+        app:layout_constraintStart_toEndOf="@id/contactDetailsAvatarImage"
+        app:layout_constraintTop_toBottomOf="@id/contactDetailsNameText" />
+
+    <Switch
+        android:id="@+id/birthdayNotificationSwitch"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/notification"
+        app:layout_constraintBottom_toBottomOf="@id/contactDetailsAvatarImage"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/contactDetailsBirthdayText"
+        app:layout_constraintTop_toBottomOf="@id/contactDetailsNameText" />
 
     <TextView
         android:id="@+id/contactDetailsNumber1Text"

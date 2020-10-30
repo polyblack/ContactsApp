@@ -1,9 +1,12 @@
 package com.polyblack.contactsapp.ui.activity
 
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
+import android.os.Build
 import android.os.Bundle
 import android.os.IBinder
 import androidx.appcompat.app.AppCompatActivity
@@ -15,12 +18,14 @@ import com.polyblack.contactsapp.ui.ServiceIBinderDepend
 import com.polyblack.contactsapp.ui.fragments.contact_details.ContactDetailsFragment
 import com.polyblack.contactsapp.ui.fragments.contact_list.ContactListFragment
 
+
 class MainActivity :
     AppCompatActivity(),
-    ContactListFragment.OnContactSelectedListener,
-    ToolbarBackButtonListener {
+    ContactListFragment.OnContactSelectedListener {
     private lateinit var binding: ActivityMainBinding
     private lateinit var contactsService: ContactsService
+    private val ACTION_OPEN_DETAILS = "OPEN_DETAILS"
+    private val EXTRA_CONTACT_ID = "CONTACT_ID"
     private var iBinder: IBinder? = null
     private var bound = false
     private val connection = object : ServiceConnection {
@@ -37,7 +42,6 @@ class MainActivity :
         override fun onServiceDisconnected(name: ComponentName?) {
             bound = false
         }
-
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -48,8 +52,25 @@ class MainActivity :
         if (savedInstanceState == null) {
             addContactListFragment()
         }
-        val intent = Intent(this, ContactsService::class.java)
-        bindService(intent, connection, Context.BIND_AUTO_CREATE)
+        val intentService = Intent(this, ContactsService::class.java)
+        bindService(intentService, connection, Context.BIND_AUTO_CREATE)
+    }
+
+    override fun onAttachFragment(fragment: Fragment) {
+        super.onAttachFragment(fragment)
+        iBinder?.let { if (fragment is ServiceIBinderDepend) fragment.setServiceBinder(it) }
+    }
+
+    override fun onNewIntent(intent: Intent?) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+    }
+
+    override fun onResumeFragments() {
+        super.onResumeFragments()
+        if (intent?.action == ACTION_OPEN_DETAILS) {
+            openAfterNotificationClicked()
+        }
     }
 
     override fun onDestroy() {
@@ -58,11 +79,6 @@ class MainActivity :
             bound = false
         }
         super.onDestroy()
-    }
-
-    override fun onAttachFragment(fragment: Fragment) {
-        super.onAttachFragment(fragment)
-        iBinder?.let { if (fragment is ServiceIBinderDepend) fragment.setServiceBinder(it) }
     }
 
     override fun onContactSelected(contactId: Int) {
@@ -74,17 +90,40 @@ class MainActivity :
         return true
     }
 
-    override fun setButtonVisibility(isVisible: Boolean) {
-        supportActionBar?.let {
-            it.setDisplayHomeAsUpEnabled(isVisible)
-            it.setDisplayShowHomeEnabled(isVisible)
+    fun createNotificationChannel() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channel = NotificationChannel(
+                R.integer.channel_id.toString(),
+                R.string.channel_name.toString(),
+                NotificationManager.IMPORTANCE_DEFAULT
+            )
+            val notificationManager: NotificationManager =
+                getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            notificationManager.createNotificationChannel(channel)
         }
+    }
+
+    private fun openAfterNotificationClicked() {
+        if (getCurrentFragment() is ContactDetailsFragment) {
+            intent.extras?.getInt(EXTRA_CONTACT_ID)
+                ?.let { replaceWithContactDetailsFragmentNoBackStack(it) }
+        } else {
+            intent.extras?.getInt(EXTRA_CONTACT_ID)?.let { replaceWithContactDetailsFragment(it) }
+        }
+        intent = null
     }
 
     private fun addContactListFragment() {
         val contactListFragment = ContactListFragment()
         supportFragmentManager.beginTransaction()
             .add(R.id.fragment_container, contactListFragment)
+            .commit()
+    }
+
+    private fun replaceWithContactDetailsFragmentNoBackStack(contactId: Int) {
+        val detailsFragment = ContactDetailsFragment.newInstance(contactId)
+        supportFragmentManager.beginTransaction()
+            .replace(R.id.fragment_container, detailsFragment)
             .commit()
     }
 
@@ -95,4 +134,7 @@ class MainActivity :
             .addToBackStack(null)
             .commit()
     }
+
+    private fun getCurrentFragment(): Fragment? =
+        supportFragmentManager.findFragmentById(R.id.fragment_container)
 }

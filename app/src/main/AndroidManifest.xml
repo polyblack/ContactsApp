@@ -18,6 +18,12 @@
             </intent-filter>
         </activity>
         <service android:name=".service.ContactsService" />
+        <receiver
+            android:name=".ui.fragments.contact_details.AlarmReceiver">
+            <intent-filter>
+                <action android:name="com.polyblack.contactsapp.CONTACT_BIRTHDAY_NOTIFICATION" />
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>
