@@ -6,4 +6,8 @@
     <string name="contacts">Контакты</string>
     <string name="profile">Профиль</string>
     <string name="avatar">Аватар</string>
+    <string name="birthday">День рождения</string>
+    <string name="notification">Напоминание</string>
+    <string name="channel_name">Напоминание о дне рождения</string>
+    <string name="notification_message">Сегодня день рождения у</string>
 </resources>
