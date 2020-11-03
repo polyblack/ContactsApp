@@ -14,6 +14,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.net.toUri
 import androidx.fragment.app.Fragment
 import com.polyblack.contactsapp.R
 import com.polyblack.contactsapp.databinding.FragmentContactDetailsBinding
@@ -21,6 +22,7 @@ import com.polyblack.contactsapp.model.Contact
 import com.polyblack.contactsapp.service.ContactsService
 import com.polyblack.contactsapp.ui.ServiceIBinderDepend
 import com.polyblack.contactsapp.ui.activity.MainActivity
+import com.polyblack.contactsapp.utils.DateUtils.Companion.getTimeLeftInMillis
 import kotlin.properties.Delegates
 
 private const val ARG_CONTACT_ID = "contactId"
@@ -102,16 +104,24 @@ class ContactDetailsFragment : Fragment(),
     }
 
     private fun onGetContactByIdResult(contact: Contact) {
-        Log.d("fragment_details", contact.name)
+        Log.d("fragment_details", "${contact.name} id= ${contact.id}")
         binding.birthdayNotificationSwitch.visibility = View.VISIBLE
         binding.birthdayNotificationSwitch.isChecked = checkIfNotificationIsEnabled(contact)
         binding.birthdayNotificationSwitch.setOnCheckedChangeListener { _, isChecked ->
             changeNotificationState(isChecked, contact)
         }
+        binding.contactDetailsNameText.text = contact.name
+        binding.contactDetailsNumber1Text.text = contact.number
+        binding.contactDetailsNumber2Text.text = contact.number2
+        binding.contactDetailsEmail1Text.text = contact.email
+        binding.contactDetailsEmail2Text.text = contact.email2
+        binding.contactDetailsAvatarImage.setImageURI(contact.avatarUri?.toUri())
+
     }
 
     private fun requestContactById() {
-        arguments?.getInt(ARG_CONTACT_ID)?.let { contactsService?.getContactById(it) }
+        arguments?.getInt(ARG_CONTACT_ID)
+            ?.let { contactsService?.getContactById(requireContext(), it) }
     }
 
     private fun changeNotificationState(isSwitchOn: Boolean, contact: Contact) {
@@ -123,7 +133,7 @@ class ContactDetailsFragment : Fragment(),
             (activity as MainActivity).createNotificationChannel()
             alarmManager.set(
                 AlarmManager.RTC_WAKEUP,
-                System.currentTimeMillis() + 4000,
+                System.currentTimeMillis() + getTimeLeftInMillis(contact.birthday),
                 alarmPendingIntent
             )
         } else {

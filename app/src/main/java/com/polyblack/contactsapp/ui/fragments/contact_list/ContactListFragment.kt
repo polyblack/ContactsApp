@@ -1,16 +1,22 @@
 package com.polyblack.contactsapp.ui.fragments.contact_list
 
+import android.Manifest
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.content.pm.PackageManager
 import android.os.Bundle
 import android.os.IBinder
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
+import androidx.core.net.toUri
 import androidx.fragment.app.Fragment
 import com.polyblack.contactsapp.R
 import com.polyblack.contactsapp.databinding.FragmentContactListBinding
@@ -25,7 +31,9 @@ class ContactListFragment : Fragment(),
     private var _binding: FragmentContactListBinding? = null
     private val binding get() = _binding!!
     private var contactsService: ContactsService? by Delegates.observable(null) { _, _, newValue ->
-        newValue?.let { requestContactList() }
+        newValue?.let {
+            doOnPermissionResult()
+        }
     }
     private var contactListReceiver: BroadcastReceiver? = null
     val ACTION_CONTACT_LIST = "GET_CONTACT_LIST"
@@ -59,13 +67,6 @@ class ContactListFragment : Fragment(),
         savedInstanceState: Bundle?
     ): View? = FragmentContactListBinding.inflate(inflater, container, false)
         .apply { _binding = this }.root
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        binding.contactListAvatarImage.setOnClickListener {
-            contactListener?.onContactSelected(0)
-        }
-    }
 
     override fun onStart() {
         super.onStart()
@@ -105,12 +106,69 @@ class ContactListFragment : Fragment(),
     }
 
     private fun requestContactList() {
-        contactsService?.getContactList()
+        contactsService?.getContactList(
+            requireContext()
+        )
     }
 
     private fun onGetContactListResult(contactList: ArrayList<Contact>) {
+        binding.contactListAvatarImage.setOnClickListener {
+            contactListener?.onContactSelected(contactList[0].id)
+        }
+        binding.contactListNameText.text = contactList[0].name
+        binding.contactListNumberText.text = contactList[0].number
+        binding.contactListAvatarImage.setImageURI(contactList[0].avatarUri?.toUri())
         for (contact in contactList) {
-            Log.d("fragment_contact_list", contact.name)
+            Log.d("fragment_list", "${contact.name}  id= ${contact.id}")
+        }
+    }
+
+    private fun doOnPermissionResult() {
+        when {
+            ContextCompat.checkSelfPermission(
+                requireContext(),
+                Manifest.permission.READ_CONTACTS
+            ) == PackageManager.PERMISSION_GRANTED -> {
+                requestContactList()
+            }
+            shouldShowRequestPermissionRationale(Manifest.permission.READ_CONTACTS) -> {
+                Toast.makeText(
+                    requireContext(),
+                    getString(R.string.permission_rationale),
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+            else -> {
+                activity?.let {
+                    ActivityCompat.requestPermissions(
+                        it, arrayOf(Manifest.permission.READ_CONTACTS), 1
+                    )
+                }
+            }
+        }
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        when (requestCode) {
+            1 -> {
+                if (grantResults.isNotEmpty() && grantResults[0] ==
+                    PackageManager.PERMISSION_GRANTED
+                ) {
+                    requestContactList()
+                } else {
+                    Toast.makeText(
+                        requireContext(),
+                        getString(R.string.permission_denied),
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
+                return
+            }
+            else -> super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         }
     }
 }

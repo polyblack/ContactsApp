@@ -18,7 +18,6 @@ import com.polyblack.contactsapp.ui.ServiceIBinderDepend
 import com.polyblack.contactsapp.ui.fragments.contact_details.ContactDetailsFragment
 import com.polyblack.contactsapp.ui.fragments.contact_list.ContactListFragment
 
-
 class MainActivity :
     AppCompatActivity(),
     ContactListFragment.OnContactSelectedListener {
