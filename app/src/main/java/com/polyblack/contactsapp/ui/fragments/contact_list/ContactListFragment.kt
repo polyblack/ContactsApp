@@ -63,7 +63,7 @@ class ContactListFragment : Fragment(),
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding.contactListAvatarImage.setOnClickListener {
-            contactListener?.onContactSelected(0)
+            contactListener?.onContactSelected(409)
         }
     }
 
@@ -105,7 +105,9 @@ class ContactListFragment : Fragment(),
     }
 
     private fun requestContactList() {
-        contactsService?.getContactList()
+        contactsService?.getContactList(
+            requireContext()
+        )
     }
 
     private fun onGetContactListResult(contactList: ArrayList<Contact>) {

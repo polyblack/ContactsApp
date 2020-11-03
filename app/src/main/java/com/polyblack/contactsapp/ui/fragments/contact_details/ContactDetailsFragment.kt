@@ -111,7 +111,8 @@ class ContactDetailsFragment : Fragment(),
     }
 
     private fun requestContactById() {
-        arguments?.getInt(ARG_CONTACT_ID)?.let { contactsService?.getContactById(it) }
+        arguments?.getInt(ARG_CONTACT_ID)
+            ?.let { contactsService?.getContactById(requireContext(), it) }
     }
 
     private fun changeNotificationState(isSwitchOn: Boolean, contact: Contact) {
