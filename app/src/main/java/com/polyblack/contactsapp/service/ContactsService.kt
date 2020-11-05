@@ -1,6 +1,7 @@
 package com.polyblack.contactsapp.service
 
 import android.app.Service
+import android.content.Context
 import android.content.Intent
 import android.os.Binder
 import android.os.IBinder
@@ -28,10 +29,10 @@ class ContactsService : Service() {
         super.onDestroy()
     }
 
-    fun getContactList() {
+    fun getContactList(context: Context) {
         scope.launch {
             val contactList = withContext(Dispatchers.IO) {
-                ContactsRepository.contactList
+                ContactsRepository(context).getContactList()
             }
             val intent = Intent()
             intent.action = ACTION_CONTACT_LIST
@@ -40,10 +41,10 @@ class ContactsService : Service() {
         }
     }
 
-    fun getContactById(contactId: Int) {
+    fun getContactById(context: Context, contactId: Int) {
         scope.launch {
             val contact = withContext(Dispatchers.IO) {
-                ContactsRepository.getContactById(contactId)
+                ContactsRepository(context).getContactById(contactId)
             }
             val intent = Intent()
             intent.action = ACTION_CONTACT
