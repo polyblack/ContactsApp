@@ -32,7 +32,7 @@ class ContactsService : Service() {
     fun getContactList(context: Context) {
         scope.launch {
             val contactList = withContext(Dispatchers.IO) {
-                ContactsRepository.getContactList(context)
+                ContactsRepository(context).getContactList()
             }
             val intent = Intent()
             intent.action = ACTION_CONTACT_LIST
@@ -44,7 +44,7 @@ class ContactsService : Service() {
     fun getContactById(context: Context, contactId: Int) {
         scope.launch {
             val contact = withContext(Dispatchers.IO) {
-                ContactsRepository.getContactById(context, contactId)
+                ContactsRepository(context).getContactById(contactId)
             }
             val intent = Intent()
             intent.action = ACTION_CONTACT
