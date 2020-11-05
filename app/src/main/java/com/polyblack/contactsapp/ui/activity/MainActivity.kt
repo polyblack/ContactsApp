@@ -1,25 +1,15 @@
 package com.polyblack.contactsapp.ui.activity
 
-import android.Manifest
 import android.app.NotificationChannel
 import android.app.NotificationManager
-import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
-import android.content.ServiceConnection
-import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
-import android.os.IBinder
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.polyblack.contactsapp.R
 import com.polyblack.contactsapp.databinding.ActivityMainBinding
-import com.polyblack.contactsapp.service.ContactsService
-import com.polyblack.contactsapp.ui.ServiceIBinderDepend
 import com.polyblack.contactsapp.ui.fragments.contact_details.ContactDetailsFragment
 import com.polyblack.contactsapp.ui.fragments.contact_list.ContactListFragment
 
@@ -27,49 +17,17 @@ class MainActivity :
     AppCompatActivity(),
     ContactListFragment.OnContactSelectedListener {
     private lateinit var binding: ActivityMainBinding
-    private lateinit var contactsService: ContactsService
     private val ACTION_OPEN_DETAILS = "OPEN_DETAILS"
     private val EXTRA_CONTACT_ID = "CONTACT_ID"
-    private var iBinder: IBinder? = null
-    private var bound = false
-    private val connection = object : ServiceConnection {
-        override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
-            iBinder = service
-            val binder = service as ContactsService.ContactsBinder
-            contactsService = binder.getService()
-            bound = true
-            for (fragment in supportFragmentManager.fragments) {
-                if (fragment is ServiceIBinderDepend) fragment.setServiceBinder(service)
-            }
-        }
-
-        override fun onServiceDisconnected(name: ComponentName?) {
-            bound = false
-        }
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
         setSupportActionBar(binding.toolbar)
-        val permissionStatus =
-            ContextCompat.checkSelfPermission(this, Manifest.permission.READ_CONTACTS)
-        if (permissionStatus == PackageManager.PERMISSION_GRANTED) {
+        if (savedInstanceState == null) {
             addContactListFragment()
-        } else {
-            ActivityCompat.requestPermissions(
-                this, arrayOf(Manifest.permission.READ_CONTACTS), 1
-            )
         }
-
-        val intentService = Intent(this, ContactsService::class.java)
-        bindService(intentService, connection, Context.BIND_AUTO_CREATE)
-    }
-
-    override fun onAttachFragment(fragment: Fragment) {
-        super.onAttachFragment(fragment)
-        iBinder?.let { if (fragment is ServiceIBinderDepend) fragment.setServiceBinder(it) }
     }
 
     override fun onNewIntent(intent: Intent?) {
@@ -81,38 +39,6 @@ class MainActivity :
         super.onResumeFragments()
         if (intent?.action == ACTION_OPEN_DETAILS) {
             openAfterNotificationClicked()
-        }
-    }
-
-    override fun onDestroy() {
-        if (bound) {
-            unbindService(connection)
-            bound = false
-        }
-        super.onDestroy()
-    }
-
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<out String>,
-        grantResults: IntArray
-    ) {
-        when (requestCode) {
-            1 -> {
-                if (grantResults.isNotEmpty() && grantResults[0] ==
-                    PackageManager.PERMISSION_GRANTED
-                ) {
-                    addContactListFragment()
-                } else {
-                    Toast.makeText(
-                        this,
-                        "Необходимо разрешение на чтение контактов!",
-                        Toast.LENGTH_LONG
-                    ).show()
-                }
-                return
-            }
-            else -> super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         }
     }
 
