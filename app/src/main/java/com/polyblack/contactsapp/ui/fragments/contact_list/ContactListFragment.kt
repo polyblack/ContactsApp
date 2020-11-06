@@ -1,13 +1,9 @@
 package com.polyblack.contactsapp.ui.fragments.contact_list
 
 import android.Manifest
-import android.content.BroadcastReceiver
 import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.os.Bundle
-import android.os.IBinder
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -17,29 +13,22 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import com.polyblack.contactsapp.R
+import com.polyblack.contactsapp.data.model.Contact
 import com.polyblack.contactsapp.databinding.FragmentContactListBinding
-import com.polyblack.contactsapp.model.Contact
-import com.polyblack.contactsapp.service.ContactsService
-import com.polyblack.contactsapp.ui.ServiceIBinderDepend
 import kotlin.properties.Delegates
 
-class ContactListFragment : Fragment(),
-    ServiceIBinderDepend {
+class ContactListFragment : Fragment() {
     private var contactListener: OnContactSelectedListener? = null
     private var _binding: FragmentContactListBinding? = null
     private val binding get() = _binding!!
-    private var contactsService: ContactsService? by Delegates.observable(null) { _, _, newValue ->
-        newValue?.let {
-            isServiceBound = true
+    private val viewModel: ContactListViewModel by viewModels()
+    private var isPermissionGranted: Boolean by Delegates.observable(false) { _, oldValue, newValue ->
+        if (!oldValue && newValue) {
             requestContactList()
         }
     }
-    private var contactListReceiver: BroadcastReceiver? = null
-    private var isServiceBound = false
-    private var isPermissionGranted = false
-    private val ACTION_CONTACT_LIST = "GET_CONTACT_LIST"
-    private val NAME_CONTACT_LIST = "CONTACT_LIST"
     private val PERMISSION_REQUEST_CODE = 1
 
     interface OnContactSelectedListener {
@@ -51,22 +40,15 @@ class ContactListFragment : Fragment(),
         if (context is OnContactSelectedListener) {
             contactListener = context
         }
-        contactListReceiver = object : BroadcastReceiver() {
-            override fun onReceive(context: Context?, intent: Intent?) {
-                if (intent?.action.equals("GET_CONTACT_LIST")) {
-                    onGetContactListResult(
-                        intent?.getParcelableArrayListExtra<Contact>(
-                            NAME_CONTACT_LIST
-                        ) as ArrayList<Contact>
-                    )
-                }
-            }
-        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        checkPermission()
+        if (isPermissionGranted) {
+            requestContactList()
+        } else {
+            checkPermission()
+        }
     }
 
     override fun onCreateView(
@@ -76,13 +58,14 @@ class ContactListFragment : Fragment(),
     ): View? = FragmentContactListBinding.inflate(inflater, container, false)
         .apply { _binding = this }.root
 
-    override fun onStart() {
-        super.onStart()
-        activity?.registerReceiver(contactListReceiver, IntentFilter(ACTION_CONTACT_LIST))
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        viewModel.contactList.observe(viewLifecycleOwner, { onGetContactListResult(it) })
     }
 
     override fun onResume() {
         super.onResume()
+        checkPermission()
         activity?.title = getString(R.string.contacts)
         if (activity?.supportFragmentManager?.backStackEntryCount!! > 0) {
             (activity as AppCompatActivity?)?.supportActionBar?.setDisplayHomeAsUpEnabled(true)
@@ -91,11 +74,6 @@ class ContactListFragment : Fragment(),
             (activity as AppCompatActivity?)?.supportActionBar?.setDisplayHomeAsUpEnabled(false)
             (activity as AppCompatActivity?)?.supportActionBar?.setDisplayShowHomeEnabled(false)
         }
-    }
-
-    override fun onStop() {
-        super.onStop()
-        activity?.unregisterReceiver(contactListReceiver)
     }
 
     override fun onDestroyView() {
@@ -108,20 +86,13 @@ class ContactListFragment : Fragment(),
         super.onDestroy()
     }
 
-    override fun setServiceBinder(service: IBinder) {
-        val binder = service as ContactsService.ContactsBinder?
-        contactsService = binder?.getService()
-    }
-
     private fun requestContactList() {
-        if (isPermissionGranted && isServiceBound) {
-            contactsService?.getContactList(
-                requireContext()
-            )
+        if (isPermissionGranted) {
+            viewModel.getContacts()
         }
     }
 
-    private fun onGetContactListResult(contactList: ArrayList<Contact>) {
+    private fun onGetContactListResult(contactList: List<Contact>) {
         binding.contactListAvatarImage.setOnClickListener {
             contactListener?.onContactSelected(contactList[0].id)
         }
@@ -140,7 +111,6 @@ class ContactListFragment : Fragment(),
                 Manifest.permission.READ_CONTACTS
             ) == PackageManager.PERMISSION_GRANTED -> {
                 isPermissionGranted = true
-                requestContactList()
             }
             shouldShowRequestPermissionRationale(Manifest.permission.READ_CONTACTS) -> {
                 Toast.makeText(
@@ -168,7 +138,6 @@ class ContactListFragment : Fragment(),
                     PackageManager.PERMISSION_GRANTED
                 ) {
                     isPermissionGranted = true
-                    requestContactList()
                 } else {
                     Toast.makeText(
                         requireContext(),

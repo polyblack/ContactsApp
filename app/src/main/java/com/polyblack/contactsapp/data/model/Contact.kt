@@ -1,4 +1,4 @@
-package com.polyblack.contactsapp.model
+package com.polyblack.contactsapp.data.model
 
 import android.os.Parcelable
 import kotlinx.android.parcel.Parcelize
