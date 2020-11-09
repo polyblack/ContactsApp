@@ -68,4 +68,9 @@ dependencies {
     // Annotation processor
     kapt "androidx.lifecycle:lifecycle-compiler:$lifecycle_version"
     implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:2.2.0"
+
+    implementation 'com.hannesdorfmann:adapterdelegates4:4.3.0'
+    implementation 'com.hannesdorfmann:adapterdelegates4-kotlin-dsl-viewbinding:4.3.0'
+
+    implementation 'androidx.recyclerview:recyclerview:1.2.0-alpha06'
 }

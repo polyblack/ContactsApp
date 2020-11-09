@@ -12,4 +12,7 @@
     <string name="notification_message">Сегодня день рождения у</string>
     <string name="permission_rationale">Приложение не будет работать без разрешения на чтение контактов</string>
     <string name="permission_denied">Необходимо разрешение на чтение контактов!</string>
+    <string name="search_title">Поиск контактов…</string>
+    <string name="search_hint">Имя контакта…</string>
+    <string name="no_birthday">Не установлена дата рождения</string>
 </resources>

@@ -1,22 +1,22 @@
 package com.polyblack.contactsapp.ui.fragments.contact_list
 
 import android.Manifest
+import android.app.SearchManager
 import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.util.Log
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
+import android.widget.SearchView
 import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
-import androidx.core.net.toUri
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.polyblack.contactsapp.R
-import com.polyblack.contactsapp.data.model.Contact
+import com.polyblack.contactsapp.data.model.ContactListItem
 import com.polyblack.contactsapp.databinding.FragmentContactListBinding
+import com.polyblack.contactsapp.ui.adapters.contact.ContactsAdapter
 import kotlin.properties.Delegates
 
 class ContactListFragment : Fragment() {
@@ -24,6 +24,7 @@ class ContactListFragment : Fragment() {
     private var _binding: FragmentContactListBinding? = null
     private val binding get() = _binding!!
     private val viewModel: ContactListViewModel by viewModels()
+    private var contactsAdapter: ContactsAdapter? = null
     private var isPermissionGranted: Boolean by Delegates.observable(false) { _, oldValue, newValue ->
         if (!oldValue && newValue) {
             requestContactList()
@@ -32,7 +33,7 @@ class ContactListFragment : Fragment() {
     private val PERMISSION_REQUEST_CODE = 1
 
     interface OnContactSelectedListener {
-        fun onContactSelected(contactId: Int)
+        fun onContactSelected(contactItem: ContactListItem.Item)
     }
 
     override fun onAttach(context: Context) {
@@ -49,6 +50,7 @@ class ContactListFragment : Fragment() {
         } else {
             checkPermission()
         }
+        setHasOptionsMenu(true)
     }
 
     override fun onCreateView(
@@ -60,25 +62,42 @@ class ContactListFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        viewModel.contactList.observe(viewLifecycleOwner, { onGetContactListResult(it) })
+        viewModel.contactList.observe(viewLifecycleOwner, {
+            contactsAdapter?.items = it.data
+        })
+        contactsAdapter = ContactsAdapter(::onContactClick)
+        with(binding.contactListRecyclerView) {
+            layoutManager = LinearLayoutManager(requireContext())
+            adapter = contactsAdapter
+        }
     }
 
     override fun onResume() {
         super.onResume()
         checkPermission()
         activity?.title = getString(R.string.contacts)
-        if (activity?.supportFragmentManager?.backStackEntryCount!! > 0) {
-            (activity as AppCompatActivity?)?.supportActionBar?.setDisplayHomeAsUpEnabled(true)
-            (activity as AppCompatActivity?)?.supportActionBar?.setDisplayShowHomeEnabled(true)
-        } else {
-            (activity as AppCompatActivity?)?.supportActionBar?.setDisplayHomeAsUpEnabled(false)
-            (activity as AppCompatActivity?)?.supportActionBar?.setDisplayShowHomeEnabled(false)
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        inflater.inflate(R.menu.options_menu, menu)
+        val searchManager = activity?.getSystemService(Context.SEARCH_SERVICE) as SearchManager
+        val searchView = (menu.findItem(R.id.searchView).actionView as SearchView).apply {
+            setSearchableInfo(searchManager.getSearchableInfo(activity?.componentName))
         }
+        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(typing: String?): Boolean =
+                viewModel.showContactListByTyping(typing)
+
+            override fun onQueryTextChange(typing: String?): Boolean =
+                viewModel.showContactListByTyping(typing)
+        })
+        super.onCreateOptionsMenu(menu, inflater)
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+        contactsAdapter = null
     }
 
     override fun onDestroy() {
@@ -92,15 +111,12 @@ class ContactListFragment : Fragment() {
         }
     }
 
-    private fun onGetContactListResult(contactList: List<Contact>) {
-        binding.contactListAvatarImage.setOnClickListener {
-            contactListener?.onContactSelected(contactList[0].id)
-        }
-        binding.contactListNameText.text = contactList[0].name
-        binding.contactListNumberText.text = contactList[0].number
-        binding.contactListAvatarImage.setImageURI(contactList[0].avatarUri?.toUri())
-        for (contact in contactList) {
-            Log.d("fragment_list", "${contact.name}  id= ${contact.id}")
+    private fun onGetContactListResult(contactItemList: List<ContactListItem>) {
+        contactsAdapter?.items = contactItemList
+        for (contactItem in contactItemList) {
+            if (contactItem is ContactListItem.Item) {
+                Log.d("fragment_list", "${contactItem.contact.name}  id= ${contactItem.contact.id}")
+            }
         }
     }
 
@@ -149,5 +165,9 @@ class ContactListFragment : Fragment() {
             }
             else -> super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         }
+    }
+
+    private fun onContactClick(contactItem: ContactListItem.Item) {
+        contactListener?.onContactSelected(contactItem)
     }
 }

@@ -1,11 +1,6 @@
 package com.polyblack.contactsapp.ui.fragments.contact_details
 
 import android.Manifest
-import android.app.AlarmManager
-import android.app.PendingIntent
-import android.app.PendingIntent.FLAG_CANCEL_CURRENT
-import android.content.Context
-import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.util.Log
@@ -13,16 +8,13 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import com.polyblack.contactsapp.R
-import com.polyblack.contactsapp.data.model.Contact
+import com.polyblack.contactsapp.data.model.ContactListItem
 import com.polyblack.contactsapp.databinding.FragmentContactDetailsBinding
-import com.polyblack.contactsapp.ui.activity.MainActivity
-import com.polyblack.contactsapp.utils.DateUtils.Companion.getTimeLeftInMillis
 import kotlin.properties.Delegates
 
 private const val ARG_CONTACT_ID = "contactId"
@@ -46,9 +38,6 @@ class ContactDetailsFragment : Fragment() {
             requestContact()
         }
     }
-    private val ACTION_NOTIFICATION = "CONTACT_BIRTHDAY_NOTIFICATION"
-    private val EXTRA_NOTIFICATION = "NOTIFICATION_MESSAGE"
-    private val EXTRA_CONTACT_ID = "CONTACT_ID"
     private val PERMISSION_REQUEST_CODE = 1
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -69,9 +58,8 @@ class ContactDetailsFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        binding.birthdayNotificationSwitch.visibility = View.GONE
         viewModel.contact.observe(viewLifecycleOwner, {
-            onGetContactByIdResult(it)
+            onGetContactByIdResult(it.data)
         })
     }
 
@@ -79,13 +67,6 @@ class ContactDetailsFragment : Fragment() {
         super.onResume()
         checkPermission()
         activity?.title = getString(R.string.profile)
-        if (activity?.supportFragmentManager?.backStackEntryCount!! > 0) {
-            (activity as AppCompatActivity?)?.supportActionBar?.setDisplayHomeAsUpEnabled(true)
-            (activity as AppCompatActivity?)?.supportActionBar?.setDisplayShowHomeEnabled(true)
-        } else {
-            (activity as AppCompatActivity?)?.supportActionBar?.setDisplayHomeAsUpEnabled(false)
-            (activity as AppCompatActivity?)?.supportActionBar?.setDisplayShowHomeEnabled(false)
-        }
     }
 
     private fun requestContact() {
@@ -94,58 +75,21 @@ class ContactDetailsFragment : Fragment() {
         }
     }
 
-    private fun onGetContactByIdResult(contact: Contact) {
-        Log.d("fragment_details", "${contact.name} id= ${contact.id}")
-        binding.birthdayNotificationSwitch.visibility = View.VISIBLE
-        binding.birthdayNotificationSwitch.isChecked = checkIfNotificationIsEnabled(contact)
-        binding.birthdayNotificationSwitch.setOnCheckedChangeListener { _, isChecked ->
-            changeNotificationState(isChecked, contact)
+    private fun onGetContactByIdResult(contactItem: ContactListItem.Item) {
+        Log.d("fragment_details", "${contactItem.contact.name} id= ${contactItem.contact.id}")
+        binding.birthdayNotificationSwitch.isEnabled = contactItem.contact.isNotificationOn != null
+        binding.birthdayNotificationSwitch.isChecked =
+            (contactItem.contact.isNotificationOn != false) && (contactItem.contact.isNotificationOn != null)
+        binding.birthdayNotificationSwitch.setOnCheckedChangeListener { _, _ ->
+            viewModel.changeContactNotificationStatus(contactItem)
         }
-        binding.contactDetailsNameText.text = contact.name
-        binding.contactDetailsNumber1Text.text = contact.number
-        binding.contactDetailsNumber2Text.text = contact.number2
-        binding.contactDetailsEmail1Text.text = contact.email
-        binding.contactDetailsEmail2Text.text = contact.email2
-        binding.contactDetailsAvatarImage.setImageURI(contact.avatarUri?.toUri())
+        binding.contactDetailsNameText.text = contactItem.contact.name
+        binding.contactDetailsNumber1Text.text = contactItem.contact.number
+        binding.contactDetailsNumber2Text.text = contactItem.contact.number2
+        binding.contactDetailsEmail1Text.text = contactItem.contact.email
+        binding.contactDetailsEmail2Text.text = contactItem.contact.email2
+        binding.contactDetailsAvatarImage.setImageURI(contactItem.contact.avatarUri?.toUri())
     }
-
-    private fun changeNotificationState(isSwitchOn: Boolean, contact: Contact) {
-        val alarmPendingIntent = createNotificationIntent(contact).let {
-            PendingIntent.getBroadcast(context, 0, it, FLAG_CANCEL_CURRENT)
-        }
-        val alarmManager = context?.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-        if (isSwitchOn) {
-            (activity as MainActivity).createNotificationChannel()
-            alarmManager.set(
-                AlarmManager.RTC_WAKEUP,
-                System.currentTimeMillis() + getTimeLeftInMillis(contact.birthday),
-                alarmPendingIntent
-            )
-        } else {
-            if (checkIfNotificationIsEnabled(contact)) {
-                alarmManager.cancel(alarmPendingIntent)
-                alarmPendingIntent.cancel()
-            }
-        }
-    }
-
-    private fun checkIfNotificationIsEnabled(contact: Contact): Boolean =
-        PendingIntent.getBroadcast(
-            context,
-            0,
-            createNotificationIntent(contact),
-            PendingIntent.FLAG_NO_CREATE
-        ) != null
-
-    private fun createNotificationIntent(contact: Contact): Intent =
-        Intent(context, AlarmReceiver::class.java).apply {
-            action = ACTION_NOTIFICATION
-            putExtra(EXTRA_CONTACT_ID, arguments?.getInt(ARG_CONTACT_ID))
-            putExtra(
-                EXTRA_NOTIFICATION,
-                getString(R.string.notification_message) + " ${contact.name}"
-            )
-        }
 
     private fun checkPermission() {
         when {
