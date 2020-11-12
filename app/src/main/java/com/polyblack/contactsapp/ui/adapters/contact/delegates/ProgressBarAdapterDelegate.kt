@@ -5,7 +5,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.hannesdorfmann.adapterdelegates4.AbsListItemAdapterDelegate
 import com.polyblack.contactsapp.data.model.ContactListItem
-import com.polyblack.contactsapp.databinding.ProgressbarRecyclerviewBinding
+import com.polyblack.contactsapp.databinding.ProgressbarBinding
 
 class ProgressBarAdapterDelegate :
     AbsListItemAdapterDelegate<ContactListItem.Loading, ContactListItem, ProgressBarAdapterDelegate.ProgressBarViewHolder>() {
@@ -25,13 +25,13 @@ class ProgressBarAdapterDelegate :
 
     override fun onCreateViewHolder(parent: ViewGroup) =
         ProgressBarViewHolder(
-            ProgressbarRecyclerviewBinding.inflate(
+            ProgressbarBinding.inflate(
                 LayoutInflater.from(parent.context),
                 parent,
                 false
             )
         )
 
-    class ProgressBarViewHolder(binding: ProgressbarRecyclerviewBinding) :
+    class ProgressBarViewHolder(binding: ProgressbarBinding) :
         RecyclerView.ViewHolder(binding.root)
 }

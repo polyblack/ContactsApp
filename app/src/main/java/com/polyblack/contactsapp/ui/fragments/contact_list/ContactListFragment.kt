@@ -5,7 +5,6 @@ import android.app.SearchManager
 import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Bundle
-import android.util.Log
 import android.view.*
 import android.widget.SearchView
 import android.widget.Toast
@@ -108,15 +107,6 @@ class ContactListFragment : Fragment() {
     private fun requestContactList() {
         if (isPermissionGranted) {
             viewModel.getContacts()
-        }
-    }
-
-    private fun onGetContactListResult(contactItemList: List<ContactListItem>) {
-        contactsAdapter?.items = contactItemList
-        for (contactItem in contactItemList) {
-            if (contactItem is ContactListItem.Item) {
-                Log.d("fragment_list", "${contactItem.contact.name}  id= ${contactItem.contact.id}")
-            }
         }
     }
 

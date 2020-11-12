@@ -9,6 +9,12 @@
     android:paddingRight="@dimen/space_horizontal_small"
     tools:context=".ui.fragments.contact_details.ContactDetailsFragment">
 
+    <include
+        android:id="@+id/progressBar"
+        layout="@layout/progressbar"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
     <ImageView
         android:id="@+id/contactDetailsAvatarImage"
         android:layout_width="70dp"
