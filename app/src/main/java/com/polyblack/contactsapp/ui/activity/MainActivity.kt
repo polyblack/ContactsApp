@@ -1,21 +1,20 @@
 package com.polyblack.contactsapp.ui.activity
 
-import android.app.NotificationChannel
-import android.app.NotificationManager
-import android.content.Context
 import android.content.Intent
-import android.os.Build
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentManager
 import com.polyblack.contactsapp.R
+import com.polyblack.contactsapp.data.model.ContactListItem
 import com.polyblack.contactsapp.databinding.ActivityMainBinding
 import com.polyblack.contactsapp.ui.fragments.contact_details.ContactDetailsFragment
 import com.polyblack.contactsapp.ui.fragments.contact_list.ContactListFragment
 
 class MainActivity :
     AppCompatActivity(),
-    ContactListFragment.OnContactSelectedListener {
+    ContactListFragment.OnContactSelectedListener,
+    FragmentManager.OnBackStackChangedListener {
     private lateinit var binding: ActivityMainBinding
     private val ACTION_OPEN_DETAILS = "OPEN_DETAILS"
     private val EXTRA_CONTACT_ID = "CONTACT_ID"
@@ -35,6 +34,12 @@ class MainActivity :
         setIntent(intent)
     }
 
+    override fun onResume() {
+        super.onResume()
+        supportFragmentManager.addOnBackStackChangedListener(this)
+        shouldDisplayHomeUp()
+    }
+
     override fun onResumeFragments() {
         super.onResumeFragments()
         if (intent?.action == ACTION_OPEN_DETAILS) {
@@ -42,8 +47,12 @@ class MainActivity :
         }
     }
 
-    override fun onContactSelected(contactId: Int) {
-        replaceWithContactDetailsFragment(contactId)
+    override fun onContactSelected(contactItem: ContactListItem.Item) {
+        replaceWithContactDetailsFragment(contactItem.contact.id)
+    }
+
+    override fun onBackStackChanged() {
+        shouldDisplayHomeUp()
     }
 
     override fun onSupportNavigateUp(): Boolean {
@@ -51,17 +60,8 @@ class MainActivity :
         return true
     }
 
-    fun createNotificationChannel() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel = NotificationChannel(
-                R.integer.channel_id.toString(),
-                R.string.channel_name.toString(),
-                NotificationManager.IMPORTANCE_DEFAULT
-            )
-            val notificationManager: NotificationManager =
-                getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-            notificationManager.createNotificationChannel(channel)
-        }
+    private fun shouldDisplayHomeUp() {
+        supportActionBar?.setDisplayHomeAsUpEnabled(supportFragmentManager.backStackEntryCount > 0)
     }
 
     private fun openAfterNotificationClicked() {

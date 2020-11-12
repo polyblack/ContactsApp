@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.polyblack.contactsapp">
+
     <uses-permission android:name="android.permission.READ_CONTACTS" />
     <application
+        android:name=".ContactsApplication"
         android:allowBackup="true"
         android:fullBackupContent="true"
         android:icon="@mipmap/ic_launcher"
@@ -16,10 +18,11 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+            <meta-data
+                android:name="android.app.searchable"
+                android:resource="@xml/searchable" />
         </activity>
-        <service android:name=".service.ContactsService" />
-        <receiver
-            android:name=".ui.fragments.contact_details.AlarmReceiver">
+        <receiver android:name=".ui.fragments.contact_details.AlarmReceiver">
             <intent-filter>
                 <action android:name="com.polyblack.contactsapp.CONTACT_BIRTHDAY_NOTIFICATION" />
             </intent-filter>

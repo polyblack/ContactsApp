@@ -5,8 +5,8 @@ import java.util.*
 
 class DateUtils {
     companion object {
-        fun getTimeLeftInMillis(date: String?): Long {
-            val sdf = SimpleDateFormat("dd-MM", Locale("ru"))
+        fun getTimeLeftInMillis(date: String): Long {
+            val sdf = SimpleDateFormat("--dd-MM", Locale("ru"))
             val calendar: GregorianCalendar = GregorianCalendar.getInstance() as GregorianCalendar
             calendar.run {
                 time = sdf.parse(date)
