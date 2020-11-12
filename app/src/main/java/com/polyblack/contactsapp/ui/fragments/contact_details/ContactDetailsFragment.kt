@@ -59,7 +59,18 @@ class ContactDetailsFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         viewModel.contact.observe(viewLifecycleOwner, {
-            onGetContactByIdResult(it.data)
+            when (it.data) {
+                is ContactListItem.Loading ->
+                    binding.progressBar.progressBarRecyclerView.visibility = View.VISIBLE
+                is ContactListItem.Error -> {
+                    binding.progressBar.progressBarRecyclerView.visibility = View.INVISIBLE
+                    Log.d("fragment_details", it.toString())
+                }
+                is ContactListItem.Item -> {
+                    binding.progressBar.progressBarRecyclerView.visibility = View.INVISIBLE
+                    onGetContactByIdResult(it.data)
+                }
+            }
         })
     }
 
