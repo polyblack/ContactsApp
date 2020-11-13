@@ -12,9 +12,14 @@ import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.ViewModelProvider
+import com.polyblack.contactsapp.ContactsApplication
 import com.polyblack.contactsapp.R
 import com.polyblack.contactsapp.data.model.ContactListItem
 import com.polyblack.contactsapp.databinding.FragmentContactDetailsBinding
+import com.polyblack.contactsapp.di.contact_details.ContactDetailsComponent
+import com.polyblack.contactsapp.di.contact_details.ContactDetailsModule
+import javax.inject.Inject
 import kotlin.properties.Delegates
 
 private const val ARG_CONTACT_ID = "contactId"
@@ -30,9 +35,11 @@ class ContactDetailsFragment : Fragment() {
             }
     }
 
+    @Inject
+    lateinit var viewModelFactory: ViewModelProvider.Factory
+    private val viewModel: ContactDetailsViewModel by viewModels { viewModelFactory }
     private var _binding: FragmentContactDetailsBinding? = null
     private val binding get() = _binding!!
-    private val viewModel: ContactDetailsViewModel by viewModels()
     private var isPermissionGranted: Boolean by Delegates.observable(false) { _, oldValue, newValue ->
         if (!oldValue && newValue) {
             requestContact()
@@ -42,6 +49,10 @@ class ContactDetailsFragment : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val component: ContactDetailsComponent? =
+            (requireActivity().application as ContactsApplication).getAppComponent()
+                ?.plusContactDetailsComponent(ContactDetailsModule())
+        component?.inject(this)
         if (isPermissionGranted) {
             requestContact()
         } else {

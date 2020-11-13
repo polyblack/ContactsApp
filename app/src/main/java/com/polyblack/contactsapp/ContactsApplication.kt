@@ -1,17 +1,18 @@
 package com.polyblack.contactsapp
 
 import android.app.Application
-import android.content.Context
+import com.polyblack.contactsapp.di.app.AppComponent
+import com.polyblack.contactsapp.di.app.AppModule
+import com.polyblack.contactsapp.di.app.DaggerAppComponent
 
 class ContactsApplication : Application() {
-    companion object {
-        lateinit var application: Application
-        val context: Context
-            get() = application.applicationContext
-    }
-
+    private var appComponent: AppComponent? = null
     override fun onCreate() {
         super.onCreate()
-        application = this
+        appComponent = DaggerAppComponent.builder()
+            .appModule(AppModule(this))
+            .build()
     }
+
+    fun getAppComponent() = appComponent
 }

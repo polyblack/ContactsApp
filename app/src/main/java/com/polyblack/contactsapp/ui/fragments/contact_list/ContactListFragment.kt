@@ -11,18 +11,25 @@ import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.polyblack.contactsapp.ContactsApplication
 import com.polyblack.contactsapp.R
 import com.polyblack.contactsapp.data.model.ContactListItem
 import com.polyblack.contactsapp.databinding.FragmentContactListBinding
+import com.polyblack.contactsapp.di.contact_list.ContactListComponent
+import com.polyblack.contactsapp.di.contact_list.ContactListModule
 import com.polyblack.contactsapp.ui.adapters.contact.ContactsAdapter
+import javax.inject.Inject
 import kotlin.properties.Delegates
 
 class ContactListFragment : Fragment() {
+    @Inject
+    lateinit var viewModelFactory: ViewModelProvider.Factory
+    private val viewModel: ContactListViewModel by viewModels { viewModelFactory }
     private var contactListener: OnContactSelectedListener? = null
     private var _binding: FragmentContactListBinding? = null
     private val binding get() = _binding!!
-    private val viewModel: ContactListViewModel by viewModels()
     private var contactsAdapter: ContactsAdapter? = null
     private var isPermissionGranted: Boolean by Delegates.observable(false) { _, oldValue, newValue ->
         if (!oldValue && newValue) {
@@ -44,6 +51,10 @@ class ContactListFragment : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val component: ContactListComponent? =
+            (requireActivity().application as ContactsApplication).getAppComponent()
+                ?.plusContactListComponent(ContactListModule())
+        component?.inject(this)
         if (isPermissionGranted) {
             requestContactList()
         } else {

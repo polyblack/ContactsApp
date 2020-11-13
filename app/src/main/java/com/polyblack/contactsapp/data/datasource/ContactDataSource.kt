@@ -5,8 +5,9 @@ import android.provider.ContactsContract
 import com.polyblack.contactsapp.data.model.Contact
 import com.polyblack.contactsapp.data.model.ContactListItem
 import com.polyblack.contactsapp.ui.fragments.contact_details.ContactNotificationManager
+import javax.inject.Inject
 
-class ContactDataSource(private val context: Context) {
+class ContactDataSource @Inject constructor(val context: Context, val notificationManager: ContactNotificationManager) {
 
     fun getContactList(): List<ContactListItem.Item> {
         val contactList = mutableListOf<ContactListItem.Item>()
@@ -81,7 +82,7 @@ class ContactDataSource(private val context: Context) {
                 var isNotificationEnabled: Boolean? = null
                 birthday?.let {
                     isNotificationEnabled =
-                        ContactNotificationManager.checkIfNotificationIsEnabled(
+                        notificationManager.checkIfNotificationIsEnabled(
                             ContactListItem.Item(
                                 Contact(
                                     contactId,
