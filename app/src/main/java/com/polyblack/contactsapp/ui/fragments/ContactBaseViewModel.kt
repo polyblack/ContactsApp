@@ -1,10 +1,9 @@
 package com.polyblack.contactsapp.ui.fragments
 
-import android.app.Application
-import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.ViewModel
 import io.reactivex.disposables.CompositeDisposable
 
-open class ContactBaseViewModel(application: Application) : AndroidViewModel(application) {
+open class ContactBaseViewModel : ViewModel() {
     val compositeDisposable = CompositeDisposable()
 
     override fun onCleared() {

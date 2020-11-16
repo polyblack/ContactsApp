@@ -1,20 +1,20 @@
 package com.polyblack.contactsapp.ui.fragments.contact_details
 
-import android.app.Application
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.polyblack.contactsapp.data.model.ContactListItem
-import com.polyblack.contactsapp.repository.ContactsRepository
+import com.polyblack.contactsapp.repository.contact_details.ContactDetailsRepository
 import com.polyblack.contactsapp.ui.fragments.ContactBaseViewModel
+import javax.inject.Inject
 
-class ContactDetailsViewModel(application: Application) : ContactBaseViewModel(application) {
-    private val contactsRepository = ContactsRepository(application)
+class ContactDetailsViewModel @Inject constructor(val contactDetailsRepository: ContactDetailsRepository) :
+    ContactBaseViewModel() {
     private val _contact = MutableLiveData<ContactState>()
     val contact: LiveData<ContactState> = _contact
 
     fun getContact(contactId: Int) {
         compositeDisposable.add(
-            contactsRepository.getContactById(contactId)
+            contactDetailsRepository.getContactById(contactId)
                 .doOnSubscribe {
                     _contact.value =
                         ContactState(true, null, ContactListItem.Loading)
@@ -34,6 +34,6 @@ class ContactDetailsViewModel(application: Application) : ContactBaseViewModel(a
     }
 
     fun changeContactNotificationStatus(contactItem: ContactListItem.Item) {
-        contactsRepository.changeContactNotificationStatus(contactItem)
+        contactDetailsRepository.changeContactNotificationStatus(contactItem)
     }
 }
