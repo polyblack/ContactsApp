@@ -1,6 +1,6 @@
 package com.polyblack.contactsapp.di.contact_details
 
-import com.polyblack.contactsapp.ui.fragments.contact_details.ContactDetailsFragment
+import com.polyblack.contactsapp.presentation.ui.fragments.contact_details.ContactDetailsFragment
 import dagger.Subcomponent
 
 @ContactDetailsScope
