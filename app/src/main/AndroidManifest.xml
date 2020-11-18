@@ -12,7 +12,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".ui.activity.MainActivity">
+        <activity android:name="com.polyblack.contactsapp.presentation.ui.activity.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -22,7 +22,7 @@
                 android:name="android.app.searchable"
                 android:resource="@xml/searchable" />
         </activity>
-        <receiver android:name=".ui.fragments.contact_details.AlarmReceiver">
+        <receiver android:name="com.polyblack.contactsapp.presentation.broadcast_receivers.AlarmReceiver">
             <intent-filter>
                 <action android:name="com.polyblack.contactsapp.CONTACT_BIRTHDAY_NOTIFICATION" />
             </intent-filter>

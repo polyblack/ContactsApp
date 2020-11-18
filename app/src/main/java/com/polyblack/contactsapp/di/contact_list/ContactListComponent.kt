@@ -1,6 +1,6 @@
 package com.polyblack.contactsapp.di.contact_list
 
-import com.polyblack.contactsapp.ui.fragments.contact_list.ContactListFragment
+import com.polyblack.contactsapp.presentation.ui.fragments.contact_list.ContactListFragment
 import dagger.Subcomponent
 
 @ContactListScope
