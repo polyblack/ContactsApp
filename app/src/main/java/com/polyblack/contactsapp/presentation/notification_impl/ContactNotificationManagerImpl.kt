@@ -12,13 +12,15 @@ import com.polyblack.contactsapp.presentation.broadcast_receivers.AlarmReceiver
 import com.polyblack.contactsapp.utils.DateUtils
 import com.polyblack.data.notification.ContactNotificationManager
 import com.polyblack.domain.entities.Contact
+import com.polyblack.domain.interactors.calendar.NotificationCalendar
 import javax.inject.Inject
 
-class ContactNotificationManagerImpl @Inject constructor(val context: Context) :
+class ContactNotificationManagerImpl @Inject constructor(val context: Context, val notificationCalendar: NotificationCalendar) :
     ContactNotificationManager {
     private val ACTION_NOTIFICATION = "CONTACT_BIRTHDAY_NOTIFICATION"
     private val EXTRA_NOTIFICATION = "NOTIFICATION_MESSAGE"
     private val EXTRA_CONTACT_ID = "CONTACT_ID"
+    val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
 
     override fun getNewNotificationStatus(contact: Contact): Boolean {
         val alarmPendingIntent = createNotificationIntent(contact).let {
@@ -29,16 +31,11 @@ class ContactNotificationManagerImpl @Inject constructor(val context: Context) :
                 PendingIntent.FLAG_CANCEL_CURRENT
             )
         }
-        val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+     //val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
         when (contact.isNotificationOn) {
             false -> {
                 contact.birthday?.let {
-                    createNotificationChannel()
-                    alarmManager.set(
-                        AlarmManager.RTC_WAKEUP,
-                        System.currentTimeMillis() + DateUtils.getTimeLeftInMillis(it),
-                        alarmPendingIntent
-                    )
+                    setNotification(it, alarmPendingIntent)
                     return true
                 } ?: return false
             }
@@ -62,6 +59,15 @@ class ContactNotificationManagerImpl @Inject constructor(val context: Context) :
             createNotificationIntent(contact),
             PendingIntent.FLAG_NO_CREATE
         ) != null
+
+    override fun setNotification(birthday: String, pendingIntent :PendingIntent) {
+        createNotificationChannel()
+        alarmManager.set(
+            AlarmManager.RTC_WAKEUP,
+            DateUtils.getTimeLeftInMillis(birthday, notificationCalendar),
+            pendingIntent
+        )
+    }
 
     private fun createNotificationIntent(contact: Contact): Intent =
         Intent(context, AlarmReceiver::class.java).apply {

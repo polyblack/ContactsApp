@@ -6,6 +6,8 @@ import com.polyblack.contactsapp.presentation.notification_impl.ContactNotificat
 import com.polyblack.data.datasource.ContactDataSource
 import com.polyblack.data.datasource.ContactDataSourceImpl
 import com.polyblack.data.notification.ContactNotificationManager
+import com.polyblack.domain.interactors.calendar.NotificationCalendar
+import com.polyblack.domain.interactors.calendar.NotificationCalendarImpl
 import dagger.Module
 import dagger.Provides
 import javax.inject.Singleton
@@ -19,8 +21,15 @@ class AppModule(private val context: Context) {
 
     @Provides
     @Singleton
-    fun provideNotificationManager(context: Context): ContactNotificationManager =
-        ContactNotificationManagerImpl(context)
+    fun provideNotificationCalendar(): NotificationCalendar = NotificationCalendarImpl()
+
+    @Provides
+    @Singleton
+    fun provideNotificationManager(
+        context: Context,
+        notifcationCalendar: NotificationCalendar
+    ): ContactNotificationManager =
+        ContactNotificationManagerImpl(context, notifcationCalendar)
 
     @Provides
     @Singleton
