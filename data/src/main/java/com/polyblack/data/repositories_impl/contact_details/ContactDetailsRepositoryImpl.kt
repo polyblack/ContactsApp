@@ -14,7 +14,4 @@ class ContactDetailsRepositoryImpl @Inject constructor(val dataSource: ContactDa
         Single.fromCallable { dataSource.getContactById(contactId) }
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
-
-    override fun getContactWithNewNotificationStatus(contact: Contact) =
-        dataSource.getContactWithNewNotificationStatus(contact)
 }

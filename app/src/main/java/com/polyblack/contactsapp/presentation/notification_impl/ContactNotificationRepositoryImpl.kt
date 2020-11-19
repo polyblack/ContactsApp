@@ -9,48 +9,18 @@ import android.content.Intent
 import android.os.Build
 import com.polyblack.contactsapp.R
 import com.polyblack.contactsapp.presentation.broadcast_receivers.AlarmReceiver
-import com.polyblack.contactsapp.utils.DateUtils
-import com.polyblack.data.notification.ContactNotificationManager
 import com.polyblack.domain.entities.Contact
-import com.polyblack.domain.interactors.calendar.NotificationCalendar
+import com.polyblack.domain.repositories.notification.ContactNotificationRepository
 import javax.inject.Inject
 
-class ContactNotificationManagerImpl @Inject constructor(val context: Context, val notificationCalendar: NotificationCalendar) :
-    ContactNotificationManager {
+class ContactNotificationRepositoryImpl @Inject constructor(
+    val context: Context,
+    val alarmManager: AlarmManager
+) :
+    ContactNotificationRepository {
     private val ACTION_NOTIFICATION = "CONTACT_BIRTHDAY_NOTIFICATION"
     private val EXTRA_NOTIFICATION = "NOTIFICATION_MESSAGE"
     private val EXTRA_CONTACT_ID = "CONTACT_ID"
-    val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-
-    override fun getNewNotificationStatus(contact: Contact): Boolean {
-        val alarmPendingIntent = createNotificationIntent(contact).let {
-            PendingIntent.getBroadcast(
-                context,
-                contact.id,
-                it,
-                PendingIntent.FLAG_CANCEL_CURRENT
-            )
-        }
-     //val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-        when (contact.isNotificationOn) {
-            false -> {
-                contact.birthday?.let {
-                    setNotification(it, alarmPendingIntent)
-                    return true
-                } ?: return false
-            }
-            true -> {
-                if (getNotificationStatus(contact)) {
-                    alarmManager.cancel(alarmPendingIntent)
-                    alarmPendingIntent.cancel()
-                }
-                return false
-            }
-            else -> {
-                return false
-            }
-        }
-    }
 
     override fun getNotificationStatus(contact: Contact): Boolean =
         PendingIntent.getBroadcast(
@@ -60,13 +30,38 @@ class ContactNotificationManagerImpl @Inject constructor(val context: Context, v
             PendingIntent.FLAG_NO_CREATE
         ) != null
 
-    override fun setNotification(birthday: String, pendingIntent :PendingIntent) {
+    override fun setNotification(contact: Contact, millisToNotify: Long): Contact {
         createNotificationChannel()
+        val alarmPendingIntent = createNotificationIntent(contact).let {
+            PendingIntent.getBroadcast(
+                context,
+                contact.id,
+                it,
+                PendingIntent.FLAG_CANCEL_CURRENT
+            )
+        }
         alarmManager.set(
             AlarmManager.RTC_WAKEUP,
-            DateUtils.getTimeLeftInMillis(birthday, notificationCalendar),
-            pendingIntent
+            millisToNotify,
+            alarmPendingIntent
         )
+        contact.isNotificationOn = true
+        return contact
+    }
+
+    override fun cancelNotification(contact: Contact): Contact {
+        val alarmPendingIntent = createNotificationIntent(contact).let {
+            PendingIntent.getBroadcast(
+                context,
+                contact.id,
+                it,
+                PendingIntent.FLAG_CANCEL_CURRENT
+            )
+        }
+        alarmManager.cancel(alarmPendingIntent)
+        alarmPendingIntent.cancel()
+        contact.isNotificationOn = false
+        return contact
     }
 
     private fun createNotificationIntent(contact: Contact): Intent =

@@ -5,5 +5,4 @@ import io.reactivex.Single
 
 interface ContactDetailsRepository {
     fun getContactById(contactId: Int): Single<Contact>
-    fun getContactWithNewNotificationStatus(contact: Contact): Contact
 }

@@ -2,13 +2,11 @@ package com.polyblack.data.datasource
 
 import android.content.Context
 import android.provider.ContactsContract
-import com.polyblack.data.notification.ContactNotificationManager
 import com.polyblack.domain.entities.Contact
 import javax.inject.Inject
 
 class ContactDataSourceImpl @Inject constructor(
-    val context: Context,
-    val notificationManager: ContactNotificationManager
+    val context: Context
 ) : ContactDataSource {
     override fun getContactList(): List<Contact> {
         val contactList = mutableListOf<Contact>()
@@ -78,21 +76,6 @@ class ContactDataSourceImpl @Inject constructor(
                 email1 = emails.firstOrNull()
                 email2 = emails.getOrNull(1)
                 val birthday = getBirthday(contactId)
-                var isNotificationEnabled: Boolean? = null
-                birthday?.let {
-                    isNotificationEnabled =
-                        notificationManager.getNotificationStatus(
-                            Contact(
-                                contactId,
-                                name,
-                                number1,
-                                number2,
-                                email1,
-                                email2,
-                                avatarUri
-                            )
-                        )
-                }
                 contact =
                     Contact(
                         contactId,
@@ -102,16 +85,10 @@ class ContactDataSourceImpl @Inject constructor(
                         email1,
                         email2,
                         avatarUri,
-                        birthday,
-                        isNotificationEnabled
+                        birthday
                     )
             }
         }
-        return contact
-    }
-
-    override fun getContactWithNewNotificationStatus(contact: Contact): Contact {
-        contact.isNotificationOn = notificationManager.getNewNotificationStatus(contact)
         return contact
     }
 
