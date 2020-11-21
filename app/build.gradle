@@ -11,7 +11,7 @@ androidExtensions {
 
 android {
     compileSdkVersion 30
-    buildToolsVersion "30.0.1"
+    buildToolsVersion "30.0.2"
 
     defaultConfig {
         applicationId "com.polyblack.contactsapp"
@@ -52,9 +52,21 @@ dependencies {
     implementation 'androidx.constraintlayout:constraintlayout:2.0.4'
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
     implementation 'androidx.lifecycle:lifecycle-extensions:2.2.0'
-    testImplementation 'junit:junit:4.13.1'
+
+    implementation 'android.arch.core:core-testing:1.1.1'
+    implementation 'junit:junit:4.13.1'
     androidTestImplementation 'androidx.test.ext:junit:1.1.2'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
+
+    implementation 'org.mockito:mockito-core:3.4.6'
+    implementation "com.nhaarman.mockitokotlin2:mockito-kotlin:2.2.0"
+    androidTestImplementation 'org.mockito:mockito-android:3.4.6'
+
+    implementation "org.spekframework.spek2:spek-dsl-jvm:2.0.14"
+    testRuntimeOnly "org.spekframework.spek2:spek-runner-junit5:2.0.14"
+
+    implementation 'org.jetbrains.kotlin:kotlin-test:1.4.20'
+    testRuntimeOnly "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
 
     implementation 'com.google.android.material:material:1.2.1'
     implementation "androidx.fragment:fragment-ktx:1.2.5"
@@ -68,6 +80,7 @@ dependencies {
     // Saved state module for ViewModel
     implementation "androidx.lifecycle:lifecycle-viewmodel-savedstate:$lifecycle_version"
     // Annotation processor
+    //noinspection LifecycleAnnotationProcessorWithJava8
     kapt "androidx.lifecycle:lifecycle-compiler:$lifecycle_version"
     implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:2.2.0"
 

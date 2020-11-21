@@ -1,19 +1,24 @@
 package com.polyblack.domain.interactors.contact_details
 
-import com.polyblack.domain.entities.Contact
 import com.polyblack.domain.entities.ContactState
 import com.polyblack.domain.repositories.contact_details.ContactDetailsRepository
+import com.polyblack.domain.repositories.notification.ContactNotificationRepository
 import io.reactivex.Observable
 import javax.inject.Inject
 
-class ContactDetailsInteractorImpl @Inject constructor(val repository: ContactDetailsRepository) :
+class ContactDetailsInteractorImpl @Inject constructor(
+    val contactDetailsRepository: ContactDetailsRepository,
+    val notificationRepository: ContactNotificationRepository
+) :
     ContactDetailsInteractor {
     override fun getContactById(contactId: Int): Observable<ContactState> =
-        repository.getContactById(contactId).toObservable()
-            .map { ContactState(false, null, it) }
+        contactDetailsRepository.getContactById(contactId).toObservable()
+            .map { contact ->
+                contact.birthday?.let {
+                    contact.isNotificationOn = notificationRepository.getNotificationStatus(contact)
+                }
+                ContactState(false, null, contact)
+            }
             .startWith(ContactState(true, null, null))
             .onErrorReturn { error -> ContactState(false, error, null) }
-
-    override fun getContactWithNewNotificationStatus(contact: Contact) =
-        ContactState(false, null, repository.getContactWithNewNotificationStatus(contact))
 }

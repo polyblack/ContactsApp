@@ -5,5 +5,4 @@ import com.polyblack.domain.entities.Contact
 interface ContactDataSource {
     fun getContactList(): List<Contact>
     fun getContactById(contactId: Int): Contact
-    fun getContactWithNewNotificationStatus(contact: Contact): Contact
 }

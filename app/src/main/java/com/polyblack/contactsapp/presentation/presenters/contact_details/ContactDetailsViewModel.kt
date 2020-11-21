@@ -7,9 +7,13 @@ import com.polyblack.contactsapp.presentation.presenters.ContactBaseViewModel
 import com.polyblack.domain.entities.Contact
 import com.polyblack.domain.entities.ContactState
 import com.polyblack.domain.interactors.contact_details.ContactDetailsInteractor
+import com.polyblack.domain.interactors.notification.ContactNotificationInteractor
 import javax.inject.Inject
 
-class ContactDetailsViewModel @Inject constructor(val contactDetailsInteractor: ContactDetailsInteractor) :
+class ContactDetailsViewModel @Inject constructor(
+    val contactDetailsInteractor: ContactDetailsInteractor,
+    val contactNotificationInteractor: ContactNotificationInteractor
+) :
     ContactBaseViewModel() {
     private val _contact = MutableLiveData<ContactState>()
     val contact: LiveData<ContactState> = _contact
@@ -26,6 +30,6 @@ class ContactDetailsViewModel @Inject constructor(val contactDetailsInteractor: 
     }
 
     fun getContactWithNewNotificationStatus(contact: Contact) {
-        _contact.value = contactDetailsInteractor.getContactWithNewNotificationStatus(contact)
+        _contact.value = contactNotificationInteractor.getNewNotificationStatus(contact)
     }
 }
